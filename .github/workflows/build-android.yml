@@ -1,0 +1,80 @@
+name: Build Android Manual
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Tipe Build (APK atau AAB)'
+        required: true
+        default: 'APK'
+        type: choice
+        options:
+          - APK
+          - AAB
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Prebuild Expo (Android)
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Enable Separate Build Per CPU Architecture (splits)
+        run: |
+          # Mengubah setting gradle untuk membagi APK per arsitektur CPU
+          sed -i 's/enableSeparateBuildPerCPUArchitecture = false/enableSeparateBuildPerCPUArchitecture = true/g' android/app/build.gradle
+
+      - name: Build Android App (Release)
+        run: |
+          cd android
+          if [ "${{ github.event.inputs.build_type }}" = "APK" ]; then
+            ./gradlew assembleRelease
+          else
+            ./gradlew bundleRelease
+          fi
+
+      - name: Upload ARM64 APK
+        if: github.event.inputs.build_type == 'APK'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-arm64-v8a-release
+          path: android/app/build/outputs/apk/release/app-arm64-v8a-release.apk
+          if-no-files-found: error
+
+      - name: Upload ARMEABI-V7A APK
+        if: github.event.inputs.build_type == 'APK'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-armeabi-v7a-release
+          path: android/app/build/outputs/apk/release/app-armeabi-v7a-release.apk
+          if-no-files-found: error
+
+      - name: Upload Android App Bundle (AAB)
+        if: github.event.inputs.build_type == 'AAB'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error

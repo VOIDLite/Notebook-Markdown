@@ -1,0 +1,32 @@
+{
+  "name": "notebook-markdown",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "dependencies": {
+    "@expo/metro-runtime": "~57.0.3",
+    "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@ronradtke/react-native-markdown-display": "^9.0.3",
+    "expo": "~57.0.2",
+    "expo-status-bar": "~57.0.0",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.0",
+    "react-native-paper": "^5.15.3",
+    "react-native-syntax-highlighter": "^2.1.0",
+    "react-native-web": "^0.21.2",
+    "react-syntax-highlighter": "^16.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "@types/react-syntax-highlighter": "^15.5.13",
+    "typescript": "~6.0.3"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "private": true
+}
