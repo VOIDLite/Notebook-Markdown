@@ -41,10 +41,13 @@ jobs:
       - name: Prebuild Expo (Android)
         run: npx expo prebuild --platform android --no-install
 
-      - name: Enable Separate Build Per CPU Architecture (splits)
+      - name: Configure Gradle Signing & CPU Splits
         run: |
-          # Mengubah setting gradle untuk membagi APK per arsitektur CPU
+          # 1. Mengubah setting gradle untuk membagi APK per arsitektur CPU
           sed -i 's/enableSeparateBuildPerCPUArchitecture = false/enableSeparateBuildPerCPUArchitecture = true/g' android/app/build.gradle
+          
+          # 2. Menggunakan debug signing untuk release build agar build sukses tanpa setup keystore manual
+          sed -i 's/signingConfig signingConfigs.release/signingConfig signingConfigs.debug/g' android/app/build.gradle
 
       - name: Build Android App (Release)
         run: |
