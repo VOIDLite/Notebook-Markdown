@@ -2,10 +2,6 @@ import React from 'react';
 import { StyleSheet, View, ScrollView, Text } from 'react-native';
 import Markdown from '@ronradtke/react-native-markdown-display';
 import { useTheme } from 'react-native-paper';
-// @ts-ignore - no types available for this package
-import SyntaxHighlighter from 'react-native-syntax-highlighter';
-// @ts-ignore - no types available for this path
-import { atomOneDark, atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 interface MarkdownPreviewProps {
   content: string;
@@ -16,15 +12,9 @@ export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ content }) => 
   const colors = theme.colors;
   const isDark = theme.dark;
 
-  // Style hljs sesuai dengan tema (dark/light)
-  const hljsStyle = isDark ? atomOneDark : atomOneLight;
-
-  // Custom rules untuk fence & code_block
-  // Menggunakan react-native-syntax-highlighter dengan auto-detect bahasa
   const markdownRules = {
     fence: (node: any) => {
-      // node.sourceInfo berisi bahasa dari fence (```javascript, ```xml, dll.)
-      const language = node.sourceInfo?.trim() || 'text';
+      const language = node.sourceInfo?.trim() || '';
       return (
         <View
           key={node.key}
@@ -36,39 +26,23 @@ export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ content }) => 
             },
           ]}
         >
-          {/* Label bahasa */}
-          {node.sourceInfo ? (
+          {language ? (
             <View style={[codeBlockStyles.langBadge, { backgroundColor: colors.primary + '22' }]}>
               <Text style={[codeBlockStyles.langText, { color: colors.primary }]}>
                 {language}
               </Text>
             </View>
           ) : null}
-
-          {/* Syntax Highlighted code — scroll horizontal otomatis */}
-          <SyntaxHighlighter
-            language={language}
-            style={hljsStyle}
-            highlighter="hljs"
-            customStyle={{
-              margin: 0,
-              padding: 12,
-              borderRadius: 0,
-              fontSize: 13,
-              lineHeight: 20,
-            }}
-            CodeTag={({ children, style }: any) => (
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={codeBlockStyles.scrollView}
-              >
-                <Text style={[{ fontFamily: 'monospace' }, style]}>{children}</Text>
-              </ScrollView>
-            )}
-          >
-            {node.content?.trim() ?? ''}
-          </SyntaxHighlighter>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <Text
+              style={[
+                codeBlockStyles.codeText,
+                { color: isDark ? '#abb2bf' : '#383a42' },
+              ]}
+            >
+              {node.content?.trim() ?? ''}
+            </Text>
+          </ScrollView>
         </View>
       );
     },
@@ -84,14 +58,14 @@ export const MarkdownPreview: React.FC<MarkdownPreviewProps> = ({ content }) => 
           },
         ]}
       >
-        <SyntaxHighlighter
-          language="text"
-          style={hljsStyle}
-          highlighter="hljs"
-          customStyle={{ margin: 0, padding: 12, fontSize: 13, lineHeight: 20 }}
+        <Text
+          style={[
+            codeBlockStyles.codeText,
+            { color: isDark ? '#abb2bf' : '#383a42' },
+          ]}
         >
           {node.content?.trim() ?? ''}
-        </SyntaxHighlighter>
+        </Text>
       </View>
     ),
   };
@@ -269,8 +243,11 @@ const codeBlockStyles = StyleSheet.create({
     fontWeight: '600',
     textTransform: 'lowercase',
   },
-  scrollView: {
-    // SyntaxHighlighter handles internal scrolling
+  codeText: {
+    fontFamily: 'monospace',
+    fontSize: 13,
+    lineHeight: 20,
+    padding: 12,
   },
 });
 

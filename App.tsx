@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, SafeAreaView, StatusBar, useColorScheme, Animated, Easing, Dimensions, Alert } from 'react-native';
+import { StyleSheet, View, useColorScheme, Animated, Easing, Dimensions, Alert } from 'react-native';
 import { PaperProvider } from 'react-native-paper';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar } from 'expo-status-bar';
 import { lightPaperTheme, darkPaperTheme } from './src/theme/paperTheme';
 import { Note } from './src/types';
 import { getNotes, saveNote, deleteNote, getSettings, AppSettings } from './src/utils/storage';
@@ -188,77 +190,77 @@ export default function App() {
   const circleSize = screenDiagonal * 2.2;
 
   return (
-    <PaperProvider theme={paperTheme}>
-      <SafeAreaView
-        style={[styles.safeArea, { backgroundColor: paperTheme.colors.surface }]}
-      >
-        <StatusBar
-          barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-          backgroundColor={paperTheme.colors.surface}
-        />
-
-        <View
-          style={[styles.rootContainer, { backgroundColor: paperTheme.colors.background }]}
+    <SafeAreaProvider>
+      <PaperProvider theme={paperTheme}>
+        <SafeAreaView
+          style={[styles.safeArea, { backgroundColor: paperTheme.colors.surface }]}
+          edges={['top', 'left', 'right', 'bottom']}
         >
-          {showSettings ? (
-            <SettingsScreen
-              settings={settings}
-              onBack={() => setShowSettings(false)}
-              onUpdateSettings={setSettings}
-            />
-          ) : activeNoteId && activeNote ? (
-            <NoteEditorScreen
-              note={activeNote}
-              isDarkMode={isDarkMode}
-              onToggleTheme={handleToggleTheme}
-              onBack={handleBackToList}
-              onSave={handleSaveNote}
-            />
-          ) : (
-            <>
-              <Header
+          <StatusBar style={isDarkMode ? 'light' : 'dark'} />
+
+          <View
+            style={[styles.rootContainer, { backgroundColor: paperTheme.colors.background }]}
+          >
+            {showSettings ? (
+              <SettingsScreen
+                settings={settings}
+                onBack={() => setShowSettings(false)}
+                onUpdateSettings={setSettings}
+              />
+            ) : activeNoteId && activeNote ? (
+              <NoteEditorScreen
+                note={activeNote}
                 isDarkMode={isDarkMode}
                 onToggleTheme={handleToggleTheme}
-                onOpenSettings={() => setShowSettings(true)}
-                onImportNotes={handleImportNotes}
-                onExportAllNotes={handleExportAllNotes}
+                onBack={handleBackToList}
+                onSave={handleSaveNote}
               />
-              <NoteListScreen
-                notes={notes}
-                settings={settings}
-                onSelectNote={handleSelectNote}
-                onCreateNote={handleCreateNote}
-                onDeleteNote={handleDeleteNote}
-                onDeleteMultipleNotes={handleDeleteMultipleNotes}
-              />
-            </>
-          )}
-        </View>
+            ) : (
+              <>
+                <Header
+                  isDarkMode={isDarkMode}
+                  onToggleTheme={handleToggleTheme}
+                  onOpenSettings={() => setShowSettings(true)}
+                  onImportNotes={handleImportNotes}
+                  onExportAllNotes={handleExportAllNotes}
+                />
+                <NoteListScreen
+                  notes={notes}
+                  settings={settings}
+                  onSelectNote={handleSelectNote}
+                  onCreateNote={handleCreateNote}
+                  onDeleteNote={handleDeleteNote}
+                  onDeleteMultipleNotes={handleDeleteMultipleNotes}
+                />
+              </>
+            )}
+          </View>
 
-        {/* Telegram-style circular reveal overlay */}
-        {revealingTheme && (
-          <Animated.View
-            pointerEvents="none"
-            style={[
-              styles.revealCircle,
-              {
-                backgroundColor: revealColor,
-                width: circleSize,
-                height: circleSize,
-                borderRadius: circleSize / 2,
-                top: -circleSize / 2 + 40, // Centered on top-right button area
-                right: -circleSize / 2 + 40,
-                transform: [
-                  {
-                    scale: revealProgress,
-                  },
-                ],
-              },
-            ]}
-          />
-        )}
-      </SafeAreaView>
-    </PaperProvider>
+          {/* Telegram-style circular reveal overlay */}
+          {revealingTheme && (
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                styles.revealCircle,
+                {
+                  backgroundColor: revealColor,
+                  width: circleSize,
+                  height: circleSize,
+                  borderRadius: circleSize / 2,
+                  top: -circleSize / 2 + 40,
+                  right: -circleSize / 2 + 40,
+                  transform: [
+                    {
+                      scale: revealProgress,
+                    },
+                  ],
+                },
+              ]}
+            />
+          )}
+        </SafeAreaView>
+      </PaperProvider>
+    </SafeAreaProvider>
   );
 }
 
