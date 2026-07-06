@@ -43,11 +43,28 @@ jobs:
 
       - name: Configure Gradle Signing & CPU Splits
         run: |
-          # 1. Mengubah setting gradle untuk membagi APK per arsitektur CPU
-          sed -i 's/enableSeparateBuildPerCPUArchitecture = false/enableSeparateBuildPerCPUArchitecture = true/g' android/app/build.gradle
-          
-          # 2. Menggunakan debug signing untuk release build agar build sukses tanpa setup keystore manual
+          # 1. Menggunakan debug signing untuk release build agar build sukses tanpa setup keystore manual
           sed -i 's/signingConfig signingConfigs.release/signingConfig signingConfigs.debug/g' android/app/build.gradle
+          
+          # 2. Menyisipkan konfigurasi splits untuk membagi APK berdasarkan arsitektur CPU (ARM64 dan ARM32)
+          python3 -c "
+          with open('android/app/build.gradle', 'r') as f:
+              content = f.read()
+          splits_config = '''
+              splits {
+                  abi {
+                      enable true
+                      reset()
+                      include 'armeabi-v7a', 'arm64-v8a'
+                      universalApk false
+                  }
+              }
+          '''
+          if 'splits {' not in content:
+              content = content.replace('android {', 'android {' + splits_config, 1)
+          with open('android/app/build.gradle', 'w') as f:
+              f.write(content)
+          "
 
       - name: Build Android App (Release)
         run: |
